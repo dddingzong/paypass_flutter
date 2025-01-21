@@ -12,7 +12,8 @@ class GetStationsService {
     final url = Uri.parse('http://${Constants.ip}/getStations');
     try {
       final response = await http.get(url);
-      final List<dynamic> jsonData = json.decode(response.body);
+      final List<dynamic> jsonData =
+          json.decode(utf8.decode(response.bodyBytes));
 
       stations = jsonData
           .map((station) => {

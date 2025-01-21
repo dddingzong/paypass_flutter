@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:pay_pass/screens/detail_log_screen.dart';
+import 'package:pay_pass/screens/simple_log_screen.dart';
 import 'package:pay_pass/screens/map_screen.dart';
 import 'package:pay_pass/variables/constants.dart';
 import 'package:pay_pass/variables/globals.dart';
@@ -36,7 +36,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
       );
 
       setState(() {
-        _userData = json.decode(response.body);
+        _userData = json.decode(utf8.decode(response.bodyBytes));
         _isLoading = false;
       });
     } catch (error) {
@@ -58,17 +58,30 @@ class _MyPageScreenState extends State<MyPageScreen> {
         body: json.encode({'email': email}),
       );
 
+      // 응답 본문을 로그로 출력하여 확인
+      print('Response Body: ${response.body}');
+
       if (response.statusCode == 200) {
-        final account = json.decode(response.body)['account'];
-        setState(() {
-          _walletBalance = account is int ? account.toDouble() : 0.0; // 적절히 변환
-        });
-        print("Updated wallet balance: $_walletBalance"); // 디버깅용
+        if (response.body.isNotEmpty) {
+          final responseData = json.decode(response.body);
+          // 응답에 'account' 필드가 있는지 확인
+          if (responseData.containsKey('account')) {
+            setState(() {
+              _walletBalance =
+                  responseData['account'].toDouble(); // account 값으로 잔액 갱신
+            });
+            print("Updated wallet balance: $_walletBalance");
+          } else {
+            print("응답에 'account' 필드가 없습니다.");
+          }
+        } else {
+          print("빈 응답 본문");
+        }
       } else {
-        print("Error: ${response.statusCode}");
+        print("응답 상태 코드 오류: ${response.statusCode}");
       }
     } catch (error) {
-      print('Error fetching account balance: $error');
+      print('지갑 잔액 업데이트 중 오류 발생: $error');
     }
   }
 
@@ -99,44 +112,105 @@ class _MyPageScreenState extends State<MyPageScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Larger ID and Name with more spacing
-              _buildUserInfo('ID:', _userData['mainId'], fontSize: 24),
+              _buildUserInfo('ID:', _userData['mainId'], fontSize: 20),
               SizedBox(height: 12), // Increased spacing
-              _buildUserInfo('이름:', _userData['name'], fontSize: 20),
+              _buildUserInfo('이름:', _userData['name'], fontSize: 18),
               SizedBox(height: 12), // Increased spacing
-              _buildUserInfo('생년월일:', _userData['birth']),
+              _buildUserInfo('생년월일:', _userData['birth'], fontSize: 15),
               SizedBox(height: 12),
-              _buildUserInfo('전화번호:', _userData['phoneNumber']),
+              _buildUserInfo('전화번호:', _userData['phoneNumber'], fontSize: 15),
 
               SizedBox(height: 30),
 
-              // PayPass Wallet Section (with a container and background)
+              // PayPass Wallet 구역
               Container(
                 padding: EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.blue[50],
+                  color: Colors.white, // 배경색을 흰색으로 설정
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blueAccent),
+                  border:
+                      Border.all(color: Colors.blueAccent, width: 2), // 테두리 설정
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.3), // 그림자 효과
+                      blurRadius: 10,
+                      offset: Offset(0, 5),
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        "PayPass Wallet\n 잔액: ${_walletBalance.toStringAsFixed(2)} 원",
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blueAccent,
-                        ),
+                    Text(
+                      "PAYPASS",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blueAccent,
+                      ),
+                    ),
+                    Text(
+                      "WALLET",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    Text(
+                      "${_walletBalance.toStringAsFixed(0)}원",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
                     ),
                     SizedBox(height: 20),
-                    // Transaction buttons
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildTransactionButton("충전", Colors.black),
-                        _buildTransactionButton("출금", Colors.black),
+                        ElevatedButton(
+                          onPressed: () => _showTransactionDialog("충전"),
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 20),
+                            backgroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(
+                                  color: Colors.blueAccent, width: 1.5),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            "충전",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => _showTransactionDialog("출금"),
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 20),
+                            backgroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(
+                                  color: Colors.blueAccent, width: 1.5),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            "출금",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -180,7 +254,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
             case 1:
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => DetailLogScreen()),
+                MaterialPageRoute(builder: (context) => SimpleLogScreen()),
               );
               break;
             case 2:

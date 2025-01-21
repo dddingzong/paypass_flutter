@@ -5,7 +5,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'package:pay_pass/screens/detail_log_screen.dart';
+import 'package:pay_pass/screens/simple_log_screen.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'package:pay_pass/screens/notice_screen.dart';
@@ -227,9 +227,7 @@ class MapScrrenState extends State<MapScreen> {
               // 상세 로그 화면으로 이동 (상세 로그 화면은 별도로 구현되어 있어야 합니다)
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        DetailLogScreen()), // 여기 DetailLogScreen은 실제 상세 로그 화면으로 바꿔야 합니다.
+                MaterialPageRoute(builder: (context) => SimpleLogScreen()),
               );
               break;
             case 2:

@@ -69,3 +69,5 @@ flutter:
   uses-material-design: true
   assets:
   - assets/logo.png
+  - assets/google_button.png
+  - assets/kakao_button.png

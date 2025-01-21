@@ -27,37 +27,47 @@ class NoticeScreen {
             borderRadius: BorderRadius.circular(20),
           ),
           insetPadding: EdgeInsets.all(10), // 팝업 창 간격
-          child: Container(
-            width: double.infinity,
-            height: double.infinity,
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
+          child: Column(
+            children: [
+              // 공지사항 제목
+              Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                child: Text(
                   '공지사항',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 20),
-                Text(
-                  '테스트용 공지사항\n\n'
-                  '여기에 공지사항 내용이 길게 들어갈 수 있습니다.\n'
-                  '공지사항 내용을 길게 작성할 수 있습니다.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 18,
-                    height: 1.5,
+              ),
+
+              // 공지사항 내용
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      '첫 공지사항 입니다\n\n'
+                      '금요일에는 소주를 마시고 싶습니다.\n\n\n\n\n\n'
+                      '이상입니다.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        height: 1.5,
+                      ),
+                    ),
                   ),
                 ),
-                SizedBox(height: 40),
-                Row(
+              ),
+
+              // 버튼 영역
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     TextButton(
@@ -83,8 +93,8 @@ class NoticeScreen {
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
