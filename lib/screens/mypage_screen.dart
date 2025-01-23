@@ -36,7 +36,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
       );
 
       setState(() {
-        _userData = json.decode(response.body);
+        _userData = json.decode(utf8.decode(response.bodyBytes));
         _isLoading = false; // 데이터 로드 완료
       });
     } catch (error) {
