@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:paypass/utils/get_stations_service.dart';
 import 'package:paypass/utils/google_login_helper.dart';
+import 'package:paypass/utils/notification_service.dart';
 import 'package:paypass/screens/map_screen.dart';
 import 'package:paypass/variables/constants.dart';
 import 'package:paypass/variables/globals.dart';
@@ -20,7 +21,8 @@ class LoginScreen extends StatelessWidget {
 
     // 지도 데이터 가져오기
     GetStationsService getStationsService = GetStationsService();
-    getStationsService.fetchStations();
+    await getStationsService.fetchStations();
+    await createNotificationChannel();
 
     final response = await http.post(
       Uri.parse('http://${Constants.ip}/login'),
