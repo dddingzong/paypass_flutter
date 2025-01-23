@@ -40,6 +40,9 @@ dependencies:
   google_sign_in: ^5.4.1
   http: ^1.2.2 # http 통신을 위한 의존성성
   shared_preferences: ^2.3.5
+  geofence_foreground_service: ^1.1.3
+  latlng: ^2.0.7
+  geodesy: ^0.10.2
 
 dev_dependencies:
   flutter_test:
