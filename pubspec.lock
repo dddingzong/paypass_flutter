@@ -120,6 +120,22 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  geodesy:
+    dependency: "direct main"
+    description:
+      name: geodesy
+      sha256: e8f843c57e27e562755272a5fe6700c04567d7a6069881d0966ccda71c0f69ad
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.10.2"
+  geofence_foreground_service:
+    dependency: "direct main"
+    description:
+      name: geofence_foreground_service
+      sha256: b45ac643a02fadbf15067c5b259399c90e454e6ac234e27297959a5c8b8da977
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.3"
   google_maps:
     dependency: transitive
     description:
@@ -232,6 +248,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      sha256: "00f33b908655e606b86d2ade4710a231b802eec6f11e87e4ea3783fd72077a50"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.20.1"
   js:
     dependency: transitive
     description:
@@ -240,6 +264,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.7"
+  latlng:
+    dependency: "direct main"
+    description:
+      name: latlng
+      sha256: a324c80073ef959d67ead88b57a717b7b87f182da1b980ccae92b3555ac82712
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.7"
+  latlong2:
+    dependency: transitive
+    description:
+      name: latlong2
+      sha256: "98227922caf49e6056f91b6c56945ea1c7b166f28ffcd5fb8e72fc0b453cc8fe"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.1"
   leak_tracker:
     dependency: transitive
     description:
