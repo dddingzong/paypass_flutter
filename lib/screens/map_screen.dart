@@ -11,6 +11,7 @@ import 'package:paypass/screens/notice_screen.dart';
 import 'package:paypass/screens/mypage_screen.dart';
 import 'package:paypass/variables/globals.dart';
 import 'package:paypass/variables/constants.dart';
+import 'package:paypass/utils/geofence_service.dart';
 
 class MapScreen extends StatefulWidget {
   @override
@@ -22,6 +23,7 @@ class MapScrrenState extends State<MapScreen> {
   final Location _location = Location();
   LatLng? _currentPosition;
   late WebSocketChannel _channel;
+  final Set<Circle> _circles = {}; // Geofence 영역 표시용
 
   // 지오펜싱을 위한 중심 좌표와 반경
   static const double _geofenceRadius = Constants.geofenceRadius;
@@ -29,9 +31,10 @@ class MapScrrenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
+    setupGeofenceService();
     _initializeWebSocket();
-    _showNoticeDialogIfNeeded(); // 공지사항 다이얼로그 출력
     _getCurrentLocation();
+    _showNoticeDialogIfNeeded(); // 공지사항 다이얼로그 출력
   }
 
   // WebSocket 초기화
@@ -41,13 +44,6 @@ class MapScrrenState extends State<MapScreen> {
       Uri.parse('ws://${Constants.ip}/location'),
     );
     print("WebSocket connected");
-  }
-
-  // 공지사항 출력 관련
-  Future<void> _showNoticeDialogIfNeeded() async {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await NoticeScreen.show(context); // NoticeDialog 호출
-    });
   }
 
   Future<void> _getCurrentLocation() async {
@@ -114,8 +110,8 @@ class MapScrrenState extends State<MapScreen> {
 
     for (var station in stations) {
       double distance = _calculateDistance(
-        station['center'].latitude,
-        station['center'].longitude,
+        station['latitude'],
+        station['longitude'],
         latitude,
         longitude,
       );
@@ -165,6 +161,31 @@ class MapScrrenState extends State<MapScreen> {
     return degree * (pi / 180);
   }
 
+  // 공지사항 출력 관련
+  Future<void> _showNoticeDialogIfNeeded() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await NoticeScreen.show(context); // NoticeDialog 호출
+    });
+  }
+
+  void _addGeofenceZonesToMap() {
+    for (var station in stations) {
+      final circle = Circle(
+        circleId: CircleId(station['stationNumber'].toString()),
+        center: LatLng(station['latitude'], station['longitude']),
+        radius: 100, // 100m
+        fillColor: const Color.fromARGB(255, 101, 182, 248)
+            .withAlpha((0.4 * 255).toInt()), // 0.4 투명도
+        strokeColor: Colors.blue,
+        strokeWidth: 2,
+      );
+
+      setState(() {
+        _circles.add(circle);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -181,14 +202,17 @@ class MapScrrenState extends State<MapScreen> {
               markers: stations
                   .map((station) => Marker(
                         markerId: MarkerId(station['stationNumber'].toString()),
-                        position: station['center'],
+                        position:
+                            LatLng(station['latitude'], station['longitude']),
                         infoWindow: InfoWindow(
-                          title: '정류장 ${station['stationNumber']}',
+                          title: '정류장 ${station['name']}',
                         ),
                       ))
                   .toSet(),
+              circles: _circles,
               onMapCreated: (GoogleMapController controller) {
                 _controller.complete(controller);
+                _addGeofenceZonesToMap();
               },
               // myLocationEnabled: true,
               // myLocationButtonEnabled: true,
