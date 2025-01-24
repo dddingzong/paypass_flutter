@@ -23,6 +23,7 @@ class MapScrrenState extends State<MapScreen> {
   final Location _location = Location();
   LatLng? _currentPosition;
   late WebSocketChannel _channel;
+  final Set<Circle> _circles = {}; // Geofence 영역 표시용
 
   // 지오펜싱을 위한 중심 좌표와 반경
   static const double _geofenceRadius = Constants.geofenceRadius;
@@ -42,13 +43,6 @@ class MapScrrenState extends State<MapScreen> {
       Uri.parse('ws://${Constants.ip}/location'),
     );
     print("WebSocket connected");
-  }
-
-  // 공지사항 출력 관련
-  Future<void> _showNoticeDialogIfNeeded() async {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await NoticeScreen.show(context); // NoticeDialog 호출
-    });
   }
 
   Future<void> _getCurrentLocation() async {
@@ -90,9 +84,6 @@ class MapScrrenState extends State<MapScreen> {
 
       // WebSocket을 통해 현재 위치 전송
       _sendLocation(newLocation.latitude!, newLocation.longitude!);
-
-      // 지오펜싱 범위 내에 있는지 확인
-      //_checkGeofence(newLocation.latitude!, newLocation.longitude!);
     });
   }
 
@@ -166,6 +157,31 @@ class MapScrrenState extends State<MapScreen> {
     return degree * (pi / 180);
   }
 
+  // 공지사항 출력 관련
+  Future<void> _showNoticeDialogIfNeeded() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await NoticeScreen.show(context); // NoticeDialog 호출
+    });
+  }
+
+  void _addGeofenceZonesToMap() {
+    for (var station in stations) {
+      final circle = Circle(
+        circleId: CircleId(station['stationNumber'].toString()),
+        center: LatLng(station['latitude'], station['longitude']),
+        radius: 100, // 100m
+        fillColor: const Color.fromARGB(255, 101, 182, 248)
+            .withAlpha((0.4 * 255).toInt()), // 0.4 투명도
+        strokeColor: Colors.blue,
+        strokeWidth: 2,
+      );
+
+      setState(() {
+        _circles.add(circle);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -199,8 +215,10 @@ class MapScrrenState extends State<MapScreen> {
                         ),
                       ))
                   .toSet(),
+              circles: _circles,
               onMapCreated: (GoogleMapController controller) {
                 _controller.complete(controller);
+                _addGeofenceZonesToMap();
               },
               // myLocationEnabled: true,
               // myLocationButtonEnabled: true,

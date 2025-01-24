@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pay_pass/screens/loding_screen.dart';
+import 'package:pay_pass/screens/loading_screen.dart';
 
 void main() {
   runApp(MyApp());

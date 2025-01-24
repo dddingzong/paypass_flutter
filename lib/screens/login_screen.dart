@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:pay_pass/utils/get_stations_service.dart';
 import 'package:pay_pass/utils/google_login_helper.dart';
 import 'package:pay_pass/screens/map_screen.dart';
+import 'package:pay_pass/utils/notification_service.dart';
 import 'package:pay_pass/variables/constants.dart';
 import 'package:pay_pass/variables/globals.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'new_user_screen.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -15,12 +16,17 @@ class LoginScreen extends StatelessWidget {
   void _handleGoogleLogin(BuildContext context) async {
     String? googleId = await googleLoginHelper.login();
 
+    // 로그인 상태 저장
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isLoggedIn', true); // 로그인 상태 저장
+
     print("구글 로그인 성공: $googleId");
     globalGoogleId = googleId; // 전역 변수에 저장
 
     // 지도 데이터 가져오기
     GetStationsService getStationsService = GetStationsService();
     getStationsService.fetchStations();
+    await createNotificationChannel();
 
     final response = await http.post(
       Uri.parse('http://${Constants.ip}/login'),
@@ -33,7 +39,7 @@ class LoginScreen extends StatelessWidget {
 
       if (responseBody['status'] == 'EXISTING_USER') {
         print("EXISTING_USER 데이터 확인");
-        // 기존 유저 일시
+        // 기존 유저일 경우
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => MapScreen()),
@@ -42,7 +48,7 @@ class LoginScreen extends StatelessWidget {
 
       if (responseBody['status'] == 'NEW_USER') {
         print("NEW_USER 데이터 확인");
-        // 신규 유저 일시
+        // 신규 유저일 경우
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => NewUserScreen()),

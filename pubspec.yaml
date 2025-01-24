@@ -31,20 +31,16 @@ dependencies:
   flutter:
     sdk: flutter
 
-  google_maps_flutter: ^2.2.0
-  location: ^7.0.1 #현위치 사용용
-
-  web_socket_channel: ^2.3.0 #웹소켓통신 위함
-
-  http: ^1.0.0 #http통신 위함
-
-  shared_preferences: ^2.0.11 #날짜를 비교위함
-
-  google_sign_in: ^5.4.1
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  google_maps_flutter: ^2.10.0
+  location: ^7.0.1 #현위치 사용용
+  web_socket_channel: ^2.3.0 #웹소켓통신 위함
+  google_sign_in: ^5.4.1
+  http: ^1.2.2 # http 통신을 위한 의존성성
+  shared_preferences: ^2.3.5
+  geofence_foreground_service: ^1.1.3
+  latlng: ^2.0.7
+  geodesy: ^0.10.2
 
 dev_dependencies:
   flutter_test:
@@ -55,7 +51,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -6,9 +6,9 @@ plugins {
 }
 
 android {
-    namespace = "com.example.pay_pass"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = "25.1.8937393"
+    namespace = "com.example.pay_pass"  // 네임스페이스 설정
+    compileSdk = flutter.compileSdkVersion  // Flutter SDK에 맞춰 컴파일 SDK 설정
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -20,28 +20,26 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.pay_pass"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        //minSdk = flutter.minSdkVersion
-        minSdkVersion flutter.minSdkVersion
-        //targetSdk = flutter.targetSdkVersion
-        targetSdkVersion 30
-        //versionCode = flutter.versionCode
-        versionCode = flutter.versionCode.toInteger()
+        applicationId = "com.example.pay_pass"  // 애플리케이션 ID 설정
+        minSdkVersion 29
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            signingConfig = signingConfigs.debug  // 릴리즈 설정 (디버그 서명 사용)
         }
     }
 }
 
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+}
+
 flutter {
-    source = "../.."
+    source = "../.."  // Flutter 소스 경로
 }
