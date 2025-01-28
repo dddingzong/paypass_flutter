@@ -5,8 +5,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:paypass/utils/logger.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import 'package:paypass/screens/simple_log_screen.dart';
 import 'package:paypass/screens/notice_screen.dart';
 import 'package:paypass/screens/mypage_screen.dart';
 import 'package:paypass/variables/globals.dart';
@@ -14,11 +16,13 @@ import 'package:paypass/variables/constants.dart';
 import 'package:paypass/utils/geofence_service.dart';
 
 class MapScreen extends StatefulWidget {
+  const MapScreen({super.key});
+
   @override
-  State<MapScreen> createState() => MapScrrenState();
+  State<MapScreen> createState() => MapScreenState();
 }
 
-class MapScrrenState extends State<MapScreen> {
+class MapScreenState extends State<MapScreen> {
   final Completer<GoogleMapController> _controller = Completer();
   final Location _location = Location();
   LatLng? _currentPosition;
@@ -43,45 +47,47 @@ class MapScrrenState extends State<MapScreen> {
       // 지정된 url로 연결을 생성
       Uri.parse('ws://${Constants.ip}/location'),
     );
-    print("WebSocket connected");
+    logger.i("WebSocket connected");
   }
 
   Future<void> _getCurrentLocation() async {
-    bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
 
     // 위치 서비스 활성화 확인
-    _serviceEnabled = await _location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await _location.requestService();
-      if (!_serviceEnabled) {
+    serviceEnabled = await _location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await _location.requestService();
+      if (!serviceEnabled) {
         throw Exception('위치 서비스가 활성화 되어있지 않습니다.');
       }
     }
 
     // 위치 권한 확인
-    _permissionGranted = await _location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await _location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
+    permissionGranted = await _location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await _location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
         throw Exception('위치 권한이 거절 되었습니다.');
       }
     }
 
     // 현재 위치 가져오기
     final locationData = await _location.getLocation();
-    setState(() {
-      // setState: UI를 업데이트
-      _currentPosition =
-          LatLng(locationData.latitude!, locationData.longitude!);
-    });
-
-    // 위치 변경을 실시간으로 모니터링
-    _location.onLocationChanged.listen((newLocation) {
+    if (mounted) {
       setState(() {
         _currentPosition =
-            LatLng(newLocation.latitude!, newLocation.longitude!);
+            LatLng(locationData.latitude!, locationData.longitude!);
       });
+    }
+    // 위치 변경을 실시간으로 모니터링
+    _location.onLocationChanged.listen((newLocation) {
+      if (mounted) {
+        setState(() {
+          _currentPosition =
+              LatLng(newLocation.latitude!, newLocation.longitude!);
+        });
+      }
 
       // WebSocket을 통해 현재 위치 전송
       _sendLocation(newLocation.latitude!, newLocation.longitude!);
@@ -98,13 +104,14 @@ class MapScrrenState extends State<MapScreen> {
       'latitude': latitude,
       'longitude': longitude
     };
-    print("Sending data: $data");
     _channel.sink.add(jsonEncode(data));
+    logger.i("Sending data: $data");
   }
 
   // 지오펜싱 범위 내에 있는지 확인하는 함수
   // 뭔 어머같은 함수임 이건
   // 다 뜯어고쳐야함
+  // ignore: unused_element
   void _checkGeofence(double latitude, double longitude) {
     bool isNearStation = false; // 정류장 근처 여부를 확인하는 플래그
 
@@ -117,10 +124,10 @@ class MapScrrenState extends State<MapScreen> {
       );
 
       if (distance <= _geofenceRadius) {
-        print("정류장 ${station['stationNumber']}에 서있음");
+        logger.i("정류장 ${station['stationNumber']}에 서있음");
 
         // 출력용 데이터 (stationData는 전송하지 않음)
-        print("stationData (출력용): ${{
+        logger.i("stationData (출력용): ${{
           'name': station['name'],
           'stationNumber': station['stationNumber'],
           'latitude': latitude,
@@ -132,9 +139,9 @@ class MapScrrenState extends State<MapScreen> {
     }
 
     if (!isNearStation) {
-      print("정류장 근처가 아님");
+      logger.i("정류장 근처가 아님");
       // 출력용 데이터 (stationData는 전송하지 않음)
-      print("stationData (출력용): ${{
+      logger.i("stationData (출력용): ${{
         'stationNumber': 0,
         'latitude': latitude,
         'longitude': longitude,
@@ -191,6 +198,18 @@ class MapScrrenState extends State<MapScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text("지도 화면"),
+        flexibleSpace: Stack(
+          children: [
+            Positioned(
+              top: 40, // 화면 상단에서 40px 아래
+              left: 20, // 화면 왼쪽에서 20px 오른쪽
+              child: Image.asset(
+                'assets/logo.png', // 로고 이미지 경로
+                width: 40, // 로고 너비
+              ),
+            ),
+          ],
+        ),
       ),
       body: _currentPosition == null
           ? Center(child: CircularProgressIndicator())
@@ -214,21 +233,43 @@ class MapScrrenState extends State<MapScreen> {
                 _controller.complete(controller);
                 _addGeofenceZonesToMap();
               },
-              // myLocationEnabled: true,
-              // myLocationButtonEnabled: true,
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
             ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: ElevatedButton(
-          onPressed: () {
-            // 마이페이지로 이동
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => MyPageScreen()),
-            );
-          },
-          child: Text("마이페이지"),
-        ),
+      bottomNavigationBar: BottomNavigationBar(
+        selectedItemColor: Colors.blueAccent,
+        unselectedItemColor: Colors.grey,
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: '지도'),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: '활동 로그'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: '마이페이지'),
+        ],
+        onTap: (index) {
+          // 각 버튼에 맞는 화면으로 이동
+          switch (index) {
+            case 0:
+              // 지도 화면으로 이동
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => MapScreen()),
+              );
+              break;
+            case 1:
+              // 상세 로그 화면으로 이동 (상세 로그 화면은 별도로 구현되어 있어야 합니다)
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => SimpleLogScreen()),
+              );
+              break;
+            case 2:
+              // 마이페이지로 이동
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => MyPageScreen()),
+              );
+              break;
+          }
+        },
       ),
     );
   }
