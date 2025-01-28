@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:paypass/utils/logger.dart';
 
 import 'package:paypass/variables/globals.dart';
 import 'package:paypass/variables/constants.dart';
@@ -23,9 +24,9 @@ class GetStationsService {
               })
           .toList();
 
-      print("정류장 데이터 로드 성공");
+      logger.i("정류장 데이터 로드 성공");
     } catch (error) {
-      print("정류장 데이터 로드 중 오류 발생: $error");
+      logger.e("정류장 데이터 로드 중 오류 발생: $error");
     }
   }
 }
