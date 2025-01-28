@@ -1,5 +1,7 @@
 import 'package:flutter/services.dart';
 
+import 'package:paypass/utils/logger.dart';
+
 Future<void> createNotificationChannel() async {
   const MethodChannel channel = MethodChannel('com.app.channel');
   try {
@@ -10,6 +12,6 @@ Future<void> createNotificationChannel() async {
       'importance': 3, // 중요도(0~4, 3은 기본값)
     });
   } on PlatformException catch (e) {
-    print("Error creating notification channel: ${e.message}");
+    logger.e("Error creating notification channel: ${e.message}");
   }
 }
