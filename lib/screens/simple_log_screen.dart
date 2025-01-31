@@ -3,8 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:paypass/screens/detailed_log_screen.dart';
 import 'package:paypass/screens/mypage_screen.dart';
 import 'package:paypass/screens/map_screen.dart';
+import 'package:paypass/utils/location_service.dart';
+import 'package:paypass/variables/globals.dart';
 
-class SimpleLogScreen extends StatelessWidget {
+class SimpleLogScreen extends StatefulWidget {
+  const SimpleLogScreen({super.key});
+
+  @override
+  State<SimpleLogScreen> createState() => _SimpleLogScreenState();
+}
+
+class _SimpleLogScreenState extends State<SimpleLogScreen> {
+  final LocationService _locationService = LocationService();
   final List<Map<String, dynamic>> logData = [
     {
       'date': '2025-01-18',
@@ -21,7 +31,22 @@ class SimpleLogScreen extends StatelessWidget {
     // Add more log entries here
   ];
 
-  SimpleLogScreen({super.key});
+  @override
+  void initState() {
+    super.initState();
+    _initializeLocationService();
+  }
+
+  // LocationService 초기화  -> 얘만 페이지별로 추가해주고 initState에 추가하여 호출시 동작 가능능
+  Future<void> _initializeLocationService() async {
+    _locationService.startLocationService();
+
+    _locationService.startListening((position) {
+      // 지오펜싱 확인
+      _locationService.checkGeofence(
+          stations, position.latitude, position.longitude);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,5 +116,11 @@ class SimpleLogScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _locationService.dispose(); // 리소스 정리
+    super.dispose();
   }
 }
