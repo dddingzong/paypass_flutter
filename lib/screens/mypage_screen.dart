@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:paypass/screens/simple_log_screen.dart';
 import 'package:paypass/screens/map_screen.dart';
+import 'package:paypass/utils/location_service.dart';
 import 'package:paypass/utils/logger.dart';
 import 'package:paypass/variables/constants.dart';
 import 'package:paypass/variables/globals.dart';
@@ -22,12 +23,25 @@ class _MyPageScreenState extends State<MyPageScreen> {
   double _walletBalance = 0.0;
   // ignore: prefer_final_fields
   String _paymentDueDate = "2025-02-01";
+  final LocationService _locationService = LocationService();
 
   @override
   void initState() {
     super.initState();
+    _initializeLocationService();
     _fetchUserData(); // 유저 데이터 가져오기
     _fetchWalletBalance();
+  }
+
+  // LocationService 초기화  -> 얘만 페이지별로 추가해주고 initState에 추가하여 호출시 동작 가능능
+  Future<void> _initializeLocationService() async {
+    _locationService.startLocationService();
+
+    _locationService.startListening((position) {
+      // 지오펜싱 확인
+      _locationService.checkGeofence(
+          stations, position.latitude, position.longitude);
+    });
   }
 
   // 유저 데이터 가져오는 함수
@@ -344,5 +358,11 @@ class _MyPageScreenState extends State<MyPageScreen> {
     } catch (error) {
       logger.e('Error updating wallet balance: $error');
     }
+  }
+
+  @override
+  void dispose() {
+    _locationService.dispose(); // 리소스 정리
+    super.dispose();
   }
 }
