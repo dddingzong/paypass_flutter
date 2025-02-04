@@ -17,14 +17,15 @@ void callbackDispatcher() async {
   GeofenceForegroundService().handleTrigger(
     backgroundTriggerHandler: (zoneID, triggerType) {
       if (triggerType == GeofenceEventType.enter) {
-        logger.i('Entered geofence: $zoneID'); // 데이터 저장 로직으로 변경
-        // userFenceIn(zoneID);
+        logger.i('$globalGoogleId Entered geofence: $zoneID'); // 데이터 저장 로직으로 변경
+        userFenceIn(zoneID);
       } else if (triggerType == GeofenceEventType.exit) {
-        logger.i('Exited geofence: $zoneID'); // 데이터 수정 로직으로 변경
+        logger.i('$globalGoogleId Exited geofence: $zoneID'); // 데이터 수정 로직으로 변경
+        userFenceOut(zoneID);
       } else if (triggerType == GeofenceEventType.dwell) {
-        logger.i('Dwelled geofence: $zoneID');
+        logger.i('$globalGoogleId Dwelled geofence: $zoneID');
       } else {
-        logger.i('Unknown type in geofence');
+        logger.i('$globalGoogleId Unknown type in geofence');
       }
       return Future.value(true);
     },
@@ -44,10 +45,11 @@ Future<void> userFenceIn(zoneID) async {
   );
 
   if (response.statusCode == 200) {
-    // ignore: unused_local_variable
-    final jsonData = json.decode(utf8.decode(response.bodyBytes));
+    logger.i("geofenceLocation enetity를 성공적으로 생성하였습니다.");
   }
 }
+
+Future<void> userFenceOut(zoneID) async {}
 
 void setupGeofenceService() async {
   await GeofenceForegroundService().startGeofencingService(
