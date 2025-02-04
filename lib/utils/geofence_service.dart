@@ -36,7 +36,11 @@ Future<void> userFenceIn(zoneID) async {
   final response = await http.post(
     Uri.parse('http://${Constants.ip}/userFenceIn'),
     headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({'zoneId': zoneID}), // stationNumber 값만 넘기기
+    body: jsonEncode({
+      // stationNumber 값이랑 mainId 넘기기기
+      'mainId': globalGoogleId,
+      'stationNumber': zoneID
+    }),
   );
 
   if (response.statusCode == 200) {
